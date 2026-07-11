@@ -25,6 +25,9 @@ Rails.application.routes.draw do
     end
 
     resources :review_sessions, only: %i[create show] do
+      collection do
+        get :pending
+      end
       member do
         post :join
         patch :end, action: :end_session

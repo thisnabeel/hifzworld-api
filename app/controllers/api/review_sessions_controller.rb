@@ -114,18 +114,3 @@ module Api
     end
   end
 end
-
-    def pending
-      bundle = MushafBundle.find(params[:mushaf_bundle_id])
-      session = ReviewSession.where(
-        mushaf_bundle: bundle,
-        listener: current_user,
-        status: %w[waiting active]
-      ).order(created_at: :desc).first
-
-      return render_not_found("No pending session") unless session
-
-      render json: session_payload(session)
-    rescue ActiveRecord::RecordNotFound
-      render_not_found
-    end

@@ -11,10 +11,26 @@ class ReviewSessionChannel < ApplicationCable::Channel
   end
 
   def self.broadcast_mark_deleted(mark)
-    broadcast_to(mark.review_session, { event: "mark_deleted", mark_id: mark.id })
+    broadcast_to(
+      mark.review_session,
+      { event: "mark_deleted", mark_id: mark.id, word_id: mark.word_id }
+    )
   end
 
   def self.broadcast_session_event(session, event, payload = {})
     broadcast_to(session, { event: event, payload: payload })
+  end
+
+  def self.broadcast_state(session)
+    broadcast_to(
+      session,
+      {
+        event: "state_changed",
+        payload: {
+          current_page: session.current_page,
+          page_hidden: session.page_hidden
+        }
+      }
+    )
   end
 end

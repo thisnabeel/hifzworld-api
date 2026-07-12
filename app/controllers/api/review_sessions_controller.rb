@@ -1,7 +1,7 @@
 module Api
   class ReviewSessionsController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_session, only: %i[show join end_session marks create_mark]
+    before_action :set_session, only: %i[show join end_session marks create_mark update_state]
 
     def create
       bundle = MushafBundle.find(params[:mushaf_bundle_id])
@@ -10,13 +10,15 @@ module Api
       return render_forbidden("Only bundle owner can start a session") unless bundle.owner_id == current_user.id
       return render_forbidden("Listener must have accepted the bundle share") unless share_accepted?(bundle, listener)
 
-      room_id = "review-#{SecureRandom.uuid}"
+      start_page = bundle.page_numbers.min
       session = ReviewSession.create!(
         mushaf_bundle: bundle,
         reciter: current_user,
         listener: listener,
         status: "waiting",
-        video_room_id: room_id
+        current_page: start_page,
+        page_hidden: false,
+        video_room_id: "review-#{SecureRandom.uuid}"
       )
 
       render json: session_payload(session), status: :created
@@ -36,8 +38,11 @@ module Api
       return render_forbidden("Only the listener can join") unless @session.listener_id == current_user.id
       return render json: { error: "Session already ended" }, status: :unprocessable_entity if @session.ended?
 
-      @session.update!(status: "active", started_at: @session.started_at || Time.current)
+      attrs = { status: "active", started_at: @session.started_at || Time.current }
+      attrs[:current_page] ||= @session.mushaf_bundle.page_numbers.min if @session.current_page.blank?
+      @session.update!(attrs)
       ReviewSessionChannel.broadcast_session_event(@session, "participant_joined", { user_id: current_user.id })
+      ReviewSessionChannel.broadcast_state(@session)
 
       render json: session_payload(@session)
     end
@@ -48,6 +53,21 @@ module Api
       @session.update!(status: "ended", ended_at: Time.current)
       ReviewSessionChannel.broadcast_session_event(@session, "session_ended", { session_id: @session.id })
 
+      render json: session_payload(@session)
+    end
+
+    def update_state
+      return render_forbidden("Only the listener can drive the session") unless @session.listener_id == current_user.id
+      return render json: { error: "Session is not active" }, status: :unprocessable_entity unless @session.active? || @session.status == "waiting"
+
+      attrs = {}
+      attrs[:current_page] = params[:current_page].to_i if params.key?(:current_page)
+      attrs[:page_hidden] = ActiveModel::Type::Boolean.new.cast(params[:page_hidden]) if params.key?(:page_hidden)
+
+      return render json: { error: "Nothing to update" }, status: :unprocessable_entity if attrs.empty?
+
+      @session.update!(attrs)
+      ReviewSessionChannel.broadcast_state(@session)
       render json: session_payload(@session)
     end
 
@@ -64,8 +84,14 @@ module Api
       mark = @session.session_marks.new(mark_params)
       mark.mushaf_bundle = @session.mushaf_bundle
       mark.listener = current_user
+      # Default mark type to other; blackout presentation is client-side for reciter
+      mark.mark_type = mark.mark_type.presence || "other"
 
       if mark.save
+        if @session.current_page != mark.page_number
+          @session.update!(current_page: mark.page_number)
+          ReviewSessionChannel.broadcast_state(@session)
+        end
         ReviewSessionChannel.broadcast_mark_created(mark)
         render json: mark.as_json, status: :created
       else
@@ -88,7 +114,6 @@ module Api
       render_not_found
     end
 
-
     private
 
     def set_session
@@ -110,7 +135,7 @@ module Api
     end
 
     def session_payload(session)
-      session.as_json(livekit: LivekitTokenService.token_for(user: current_user, room_name: session.video_room_id))
+      session.as_json
     end
   end
 end

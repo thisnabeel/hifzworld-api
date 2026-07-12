@@ -31,6 +31,7 @@ Rails.application.routes.draw do
       member do
         post :join
         patch :end, action: :end_session
+        patch :state, action: :update_state
         get :marks
         post :marks, action: :create_mark
       end

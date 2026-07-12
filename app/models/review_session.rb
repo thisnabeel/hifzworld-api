@@ -26,13 +26,14 @@ class ReviewSession < ApplicationRecord
       reciter: reciter.as_json,
       listener: listener.as_json,
       status: status,
+      current_page: current_page,
+      page_hidden: page_hidden,
       video_room_id: video_room_id,
       started_at: started_at,
       ended_at: ended_at,
       created_at: created_at,
       updated_at: updated_at
     }
-    payload[:livekit] = options[:livekit] if options[:livekit]
     payload[:mark_count] = options[:mark_count] if options.key?(:mark_count)
     payload
   end

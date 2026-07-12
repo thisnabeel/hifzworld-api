@@ -4,7 +4,7 @@ module Api
     before_action :set_bundle, only: %i[show update destroy share]
 
     def mine
-      owned = current_user.owned_bundles.order(updated_at: :desc)
+      owned = current_user.owned_bundles.includes(bundle_shares: :shared_with).order(updated_at: :desc)
       shared_ids = BundleShare.accepted.where(shared_with: current_user).pluck(:mushaf_bundle_id)
       shared = MushafBundle.where(id: shared_ids).order(updated_at: :desc)
 

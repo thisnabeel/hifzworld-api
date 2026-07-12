@@ -9,7 +9,7 @@ class MushafBundle < ApplicationRecord
 
   def as_json(options = {})
     role = options[:role]
-    {
+    payload = {
       id: id,
       owner_id: owner_id,
       title: title,
@@ -20,5 +20,24 @@ class MushafBundle < ApplicationRecord
       created_at: created_at,
       updated_at: updated_at
     }
+
+    if role == "owner"
+      accepted = bundle_shares.find { |share| share.status == "accepted" } ||
+                 bundle_shares.accepted.order(updated_at: :desc).first
+      if accepted
+        payload[:collaborator_user_id] = accepted.shared_with_id
+        payload[:collaborator_name] = accepted.shared_with&.display_name
+        payload[:share_status] = accepted.status
+      else
+        pending = bundle_shares.pending.order(updated_at: :desc).first
+        if pending
+          payload[:collaborator_user_id] = pending.shared_with_id
+          payload[:collaborator_name] = pending.shared_with&.display_name
+          payload[:share_status] = pending.status
+        end
+      end
+    end
+
+    payload
   end
 end

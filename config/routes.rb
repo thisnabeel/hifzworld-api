@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Public HTML for App Store Support / Privacy / Marketing URLs
+  root "site#home"
+  get "support", to: "site#support"
+  get "privacy", to: "site#privacy"
+  get "contact", to: "site#contact"
+
   namespace :api do
     get :health, to: "health#show"
     get :app_config, to: "app_config#show"

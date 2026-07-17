@@ -49,6 +49,12 @@ curl -X POST http://localhost:3000/api/auth/apple \
 Health check: `GET /api/health`
 App config (public): `GET /api/app_config` → `{ min_app_version, app_store_id }`
 
+Public HTML (App Store URLs):
+- `/` — marketing home
+- `/support` — support
+- `/privacy` — privacy policy
+- `/contact` — contact (`nabeel@iqra.life`)
+
 ## API overview
 
 | Method | Path | Description |

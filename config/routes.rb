@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     get :health, to: "health#show"
+    get :app_config, to: "app_config#show"
 
     post "auth/apple", to: "auth#apple"
 

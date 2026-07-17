@@ -42,9 +42,12 @@ curl -X POST http://localhost:3000/api/auth/apple \
    - `RAILS_MASTER_KEY` — contents of `config/master.key`
    - `RAILS_ENV=production`
    - Optional: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`
+   - Optional: `MIN_APP_VERSION` — marketing version that forces an App Store update (e.g. `1.2.0`); blank = no gate
+   - Optional: `IOS_APP_STORE_ID` — numeric App Store ID for the Update button
 4. Deploy. Migrations run automatically via `bin/docker-entrypoint`.
 
 Health check: `GET /api/health`
+App config (public): `GET /api/app_config` → `{ min_app_version, app_store_id }`
 
 ## API overview
 

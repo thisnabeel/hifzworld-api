@@ -5,3 +5,7 @@ APPLE_AUTH_SKIP_VERIFY: "false"
 LIVEKIT_URL:
 LIVEKIT_API_KEY:
 LIVEKIT_API_SECRET:
+# Force-update gate: set to App Store marketing version after release, e.g. "1.2.0"
+MIN_APP_VERSION:
+# Numeric App Store ID for the Update button deep link
+IOS_APP_STORE_ID:

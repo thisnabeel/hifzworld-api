@@ -8,6 +8,7 @@ Rails.application.routes.draw do
 
     get "users/me", to: "users#me"
     get "users/me/feedback", to: "feedback#index"
+    post "feedback", to: "app_feedbacks#create"
 
     resources :bundles, only: %i[create show update destroy] do
       collection do

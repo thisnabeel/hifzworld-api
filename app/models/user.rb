@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :reciter_sessions, class_name: "ReviewSession", foreign_key: :reciter_id, dependent: :destroy
   has_many :listener_sessions, class_name: "ReviewSession", foreign_key: :listener_id, dependent: :destroy
   has_many :session_marks, foreign_key: :listener_id, dependent: :destroy
+  has_many :app_feedbacks, dependent: :destroy
 
   validates :apple_sub, presence: true, uniqueness: true
   validates :display_name, presence: true

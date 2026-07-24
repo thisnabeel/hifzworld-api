@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     post "auth/apple", to: "auth#apple"
 
     get "users/me", to: "users#me"
+    delete "users/me", to: "users#destroy"
     get "users/me/feedback", to: "feedback#index"
     post "feedback", to: "app_feedbacks#create"
 

@@ -1,6 +1,7 @@
 class MushafBundle < ApplicationRecord
   belongs_to :owner, class_name: "User"
   has_many :bundle_shares, dependent: :destroy
+  has_many :deck_invites, dependent: :destroy
   has_many :review_sessions, dependent: :destroy
   has_many :session_marks, dependent: :destroy
 

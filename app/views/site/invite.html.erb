@@ -1,0 +1,30 @@
+<% content_for :title, "Join #{@bundle.title} · Hifz.World" %>
+
+<h1>You're invited</h1>
+<p class="meta"><%= @shared_by_name %> shared a deck with you on Hifz.World.</p>
+
+<p style="font-size: 1.25rem; font-weight: 600; margin: 20px 0 8px; color: var(--text);"><%= @bundle.title %></p>
+<% if @bundle.description.present? %>
+  <p><%= @bundle.description %></p>
+<% end %>
+
+<p style="margin-top: 28px;">
+  <a class="btn" href="<%= @deep_link %>">Open in Hifz.World</a>
+</p>
+
+<% if @app_store_url.present? %>
+  <p class="meta" style="margin-top: 16px;">
+    Don’t have the app?
+    <a href="<%= @app_store_url %>">Get Hifz.World on the App Store</a>
+  </p>
+<% end %>
+
+<script>
+  (function () {
+    var deepLink = <%= raw @deep_link.to_json %>;
+    // Messages / WhatsApp open this page first; hand off to the app.
+    window.setTimeout(function () {
+      window.location = deepLink;
+    }, 200);
+  })();
+</script>

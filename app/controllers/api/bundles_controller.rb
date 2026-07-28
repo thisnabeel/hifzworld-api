@@ -1,7 +1,7 @@
 module Api
   class BundlesController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_bundle, only: %i[show update destroy share]
+    before_action :set_bundle, only: %i[show update destroy share invite_link]
 
     def mine
       owned = current_user.owned_bundles.includes(bundle_shares: :shared_with).order(updated_at: :desc)
@@ -64,7 +64,19 @@ module Api
       end
     end
 
+    def invite_link
+      return render_forbidden("Only the owner can share") unless @bundle.owner_id == current_user.id
+
+      invite = DeckInvite.find_or_create_active!(bundle: @bundle, created_by: current_user)
+      render json: invite.as_json(url: public_invite_url(invite.token)), status: :ok
+    end
+
     private
+
+    def public_invite_url(token)
+      "#{request.base_url}/i/#{token}"
+    end
+
 
     def set_bundle
       @bundle = MushafBundle.find(params[:id])

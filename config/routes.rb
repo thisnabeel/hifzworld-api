@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "support", to: "site#support"
   get "privacy", to: "site#privacy"
   get "contact", to: "site#contact"
+  get "i/:token", to: "site#invite", as: :deck_invite
 
   namespace :api do
     get :health, to: "health#show"
@@ -24,8 +25,11 @@ Rails.application.routes.draw do
       end
       member do
         post :share
+        post :invite_link
       end
     end
+
+    post "invites/:token/claim", to: "invites#claim"
 
     resources :bundle_shares, only: %i[index] do
       member do

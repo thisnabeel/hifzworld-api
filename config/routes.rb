@@ -15,9 +15,19 @@ Rails.application.routes.draw do
     post "auth/apple", to: "auth#apple"
 
     get "users/me", to: "users#me"
+    patch "users/me", to: "users#update"
     delete "users/me", to: "users#destroy"
     get "users/me/feedback", to: "feedback#index"
     post "feedback", to: "app_feedbacks#create"
+
+    resources :friendships, only: %i[index create destroy] do
+      member do
+        post :accept
+      end
+    end
+
+    get "friends/:user_id/bundles", to: "friend_bundles#index"
+    post "friends/:user_id/bundles", to: "friend_bundles#create"
 
     resources :bundles, only: %i[create show update destroy] do
       collection do

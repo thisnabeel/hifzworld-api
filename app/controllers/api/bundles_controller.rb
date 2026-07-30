@@ -30,10 +30,10 @@ module Api
     end
 
     def update
-      return render_forbidden("Only the owner can edit") unless @bundle.owner_id == current_user.id
+      return render_forbidden("Only the owner or a friend coach can edit") unless can_edit?(@bundle)
 
       if @bundle.update(bundle_params)
-        render json: @bundle.as_json(role: "owner")
+        render json: @bundle.as_json(role: bundle_role(@bundle))
       else
         render_unprocessable(@bundle)
       end
@@ -98,7 +98,13 @@ module Api
 
     def can_access?(bundle)
       bundle.owner_id == current_user.id ||
-        BundleShare.accepted.exists?(mushaf_bundle: bundle, shared_with: current_user)
+        BundleShare.accepted.exists?(mushaf_bundle: bundle, shared_with: current_user) ||
+        Friendship.accepted_between?(current_user, bundle.owner)
+    end
+
+    def can_edit?(bundle)
+      bundle.owner_id == current_user.id ||
+        Friendship.accepted_between?(current_user, bundle.owner)
     end
 
     def bundle_role(bundle)

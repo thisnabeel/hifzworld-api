@@ -9,6 +9,7 @@ module Api
         user.email ||= claims[:email]
         user.display_name = params[:display_name].presence || user.display_name || "User"
         user.save!
+        user.ensure_handle!
       end
 
       render json: { token: JwtService.encode(user.id), user: user.as_json }
@@ -26,6 +27,7 @@ module Api
       user.display_name = params[:display_name].presence || "Dev User"
       user.email = params[:email]
       user.save!
+      user.ensure_handle!
       user
     end
   end

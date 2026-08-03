@@ -61,5 +61,7 @@ Rails.application.routes.draw do
     end
 
     delete "session_marks/:id", to: "session_marks#destroy"
+
+    resources :mushaf_marks, only: %i[index create destroy]
   end
 end

@@ -7,8 +7,8 @@ class CreateFriendships < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
+    # t.references already indexes requester_id / recipient_id — only add composite + status.
     add_index :friendships, [:requester_id, :recipient_id], unique: true
-    add_index :friendships, :recipient_id
     add_index :friendships, :status
   end
 end

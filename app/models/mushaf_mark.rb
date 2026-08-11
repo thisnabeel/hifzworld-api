@@ -1,5 +1,5 @@
 class MushafMark < ApplicationRecord
-  MARK_TYPES = %w[tajweed pronunciation skipped added hesitation other].freeze
+  MARK_TYPES = %w[mistake tajweed pronunciation skipped added hesitation other].freeze
 
   belongs_to :subject, class_name: "User"
   belongs_to :marker, class_name: "User"
@@ -18,6 +18,8 @@ class MushafMark < ApplicationRecord
       word_id: word_id,
       verse_key: verse_key,
       page_number: page_number,
+      line_number: line_number,
+      word_position: word_position,
       mushaf_id: mushaf_id,
       mark_type: mark_type,
       note: note,

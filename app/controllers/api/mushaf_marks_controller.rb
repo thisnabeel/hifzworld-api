@@ -80,7 +80,7 @@ module Api
     end
 
     def mark_params
-      params.permit(:word_id, :verse_key, :page_number, :mushaf_id, :mark_type, :note)
+      params.permit(:word_id, :verse_key, :page_number, :line_number, :word_position, :mushaf_id, :mark_type, :note)
     end
 
     def can_mark_for?(subject)

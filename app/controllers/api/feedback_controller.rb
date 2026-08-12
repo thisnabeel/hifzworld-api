@@ -8,8 +8,9 @@ module Api
                               .order(ended_at: :desc)
 
       render json: sessions.map do |session|
-        session.as_json(mark_count: session.session_marks.size).merge(
-          marks: session.session_marks.order(page_number: :asc, created_at: :asc).map(&:as_json)
+        marks = session.session_marks.active.order(page_number: :asc, created_at: :asc)
+        session.as_json(mark_count: marks.size).merge(
+          marks: marks.map(&:as_json)
         )
       end
     end

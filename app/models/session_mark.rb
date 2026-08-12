@@ -7,9 +7,16 @@ class SessionMark < ApplicationRecord
   belongs_to :listener, class_name: "User"
 
   before_validation :normalize_mark_type
+  before_create :ensure_marked_at
 
   validates :word_id, :verse_key, :page_number, :mushaf_id, :mark_type, presence: true
   validates :mark_type, inclusion: { in: MARK_TYPES }
+
+  scope :active, -> { where(unmarked_at: nil) }
+
+  def unmarked?
+    unmarked_at.present?
+  end
 
   def as_json(_options = {})
     {
@@ -27,11 +34,17 @@ class SessionMark < ApplicationRecord
       mark_type: mark_type,
       note: note,
       created_at: created_at,
-      updated_at: updated_at
+      updated_at: updated_at,
+      marked_at: marked_at,
+      unmarked_at: unmarked_at
     }
   end
 
   private
+
+  def ensure_marked_at
+    self.marked_at ||= Time.current
+  end
 
   def normalize_mark_type
     self.mark_type = mark_type.to_s.strip.downcase.presence

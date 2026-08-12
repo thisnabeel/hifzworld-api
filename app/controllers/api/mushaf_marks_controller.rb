@@ -1,10 +1,10 @@
 module Api
   class MushafMarksController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_mark, only: %i[destroy]
+    before_action :set_mark, only: %i[update destroy]
 
     def index
-      scope = MushafMark.includes(:subject, :marker).order(created_at: :desc)
+      scope = MushafMark.includes(:subject, :marker).order(Arel.sql("COALESCE(marked_at, created_at) DESC"))
 
       if params[:subject_id].present?
         subject = User.find(params[:subject_id])
@@ -14,6 +14,10 @@ module Api
       else
         # Marks where the current user is subject or marker.
         scope = scope.where(subject_id: current_user.id).or(scope.where(marker_id: current_user.id))
+      end
+
+      unless ActiveModel::Type::Boolean.new.cast(params[:include_unmarked])
+        scope = scope.active
       end
 
       if params[:marker_id].present?
@@ -26,10 +30,10 @@ module Api
         scope = scope.where(mushaf_id: params[:mushaf_id].to_i)
       end
       if params[:from].present?
-        scope = scope.where("created_at >= ?", Time.iso8601(params[:from]))
+        scope = scope.where("COALESCE(marked_at, created_at) >= ?", Time.iso8601(params[:from]))
       end
       if params[:to].present?
-        scope = scope.where("created_at <= ?", Time.iso8601(params[:to]))
+        scope = scope.where("COALESCE(marked_at, created_at) <= ?", Time.iso8601(params[:to]))
       end
 
       limit = [[params.fetch(:limit, 200).to_i, 1].max, 500].min
@@ -51,15 +55,44 @@ module Api
         word_id: attrs[:word_id]
       )
       was_new = mark.new_record?
+      was_unmarked = mark.unmarked?
       mark.assign_attributes(attrs)
+      mark.unmarked_at = nil
+      if was_new || was_unmarked
+        mark.marked_at = parse_optional_time(params[:marked_at]) || Time.current
+      end
+      mark.marked_at ||= Time.current
 
       if mark.save
         render json: mark.as_json, status: was_new ? :created : :ok
       else
         render_unprocessable(mark)
       end
+    rescue ArgumentError
+      render json: { error: "Invalid marked_at" }, status: :unprocessable_entity
     rescue ActiveRecord::RecordNotFound
       render_not_found("Subject not found")
+    end
+
+    def update
+      unless @mark.marker_id == current_user.id || @mark.subject_id == current_user.id
+        return render_forbidden("Access denied")
+      end
+
+      attrs = {}
+      if params.key?(:unmarked_at)
+        attrs[:unmarked_at] = parse_optional_time(params[:unmarked_at])
+      end
+      attrs[:note] = params[:note] if params.key?(:note)
+      attrs[:mark_type] = params[:mark_type] if params.key?(:mark_type)
+
+      if @mark.update(attrs)
+        render json: @mark.as_json
+      else
+        render_unprocessable(@mark)
+      end
+    rescue ArgumentError
+      render json: { error: "Invalid unmarked_at" }, status: :unprocessable_entity
     end
 
     def destroy
@@ -77,6 +110,14 @@ module Api
       @mark = MushafMark.find(params[:id])
     rescue ActiveRecord::RecordNotFound
       render_not_found
+    end
+
+    def parse_optional_time(value)
+      return nil if value.blank?
+
+      Time.iso8601(value.to_s)
+    rescue ArgumentError
+      Time.zone.parse(value.to_s) || raise(ArgumentError, "Invalid time")
     end
 
     def mark_params

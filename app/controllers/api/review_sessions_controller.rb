@@ -74,7 +74,7 @@ module Api
     def marks
       return render_forbidden("Access denied") unless participant?(@session)
 
-      render json: @session.session_marks.order(created_at: :asc).map(&:as_json)
+      render json: @session.session_marks.active.order(created_at: :asc).map(&:as_json)
     end
 
     def create_mark
@@ -86,6 +86,7 @@ module Api
       mark.listener = current_user
       # Default mark type to other; blackout presentation is client-side for reciter
       mark.mark_type = mark.mark_type.presence || "other"
+      mark.marked_at = parse_optional_time(params[:marked_at]) || Time.current
 
       if mark.save
         if @session.current_page != mark.page_number
@@ -97,6 +98,8 @@ module Api
       else
         render_unprocessable(mark)
       end
+    rescue ArgumentError
+      render json: { error: "Invalid marked_at" }, status: :unprocessable_entity
     end
 
     def pending
@@ -124,6 +127,14 @@ module Api
 
     def mark_params
       params.permit(:word_id, :verse_key, :page_number, :line_number, :word_position, :mushaf_id, :mark_type, :note)
+    end
+
+    def parse_optional_time(value)
+      return nil if value.blank?
+
+      Time.iso8601(value.to_s)
+    rescue ArgumentError
+      Time.zone.parse(value.to_s) || raise(ArgumentError, "Invalid time")
     end
 
     def participant?(session)

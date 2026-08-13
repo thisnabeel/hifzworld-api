@@ -4,6 +4,7 @@ class MushafMark < ApplicationRecord
 
   belongs_to :subject, class_name: "User"
   belongs_to :marker, class_name: "User"
+  has_many :heats, dependent: :destroy
 
   before_validation :normalize_mark_type
   before_create :ensure_marked_at
@@ -36,7 +37,8 @@ class MushafMark < ApplicationRecord
       created_at: created_at,
       updated_at: updated_at,
       marked_at: marked_at,
-      unmarked_at: unmarked_at
+      unmarked_at: unmarked_at,
+      heats_count: heats_count
     }
   end
 

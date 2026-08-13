@@ -63,6 +63,8 @@ Rails.application.routes.draw do
     delete "session_marks/:id", to: "session_marks#destroy"
     patch "session_marks/:id", to: "session_marks#update"
 
-    resources :mushaf_marks, only: %i[index create update destroy]
+    resources :mushaf_marks, only: %i[index create update destroy] do
+      resources :heats, only: %i[index create]
+    end
   end
 end

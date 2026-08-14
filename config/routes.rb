@@ -66,5 +66,7 @@ Rails.application.routes.draw do
     resources :mushaf_marks, only: %i[index create update destroy] do
       resources :heats, only: %i[index create]
     end
+
+    resources :journal_entries, only: %i[index create update]
   end
 end

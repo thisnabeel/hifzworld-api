@@ -126,8 +126,18 @@ namespace :translations do
       end
     end
 
-    en_rows.each_slice(500) { |slice| VerseTranslation.upsert_all(slice, unique_by: [:translation_set_id, :verse_key]) }
-    ur_rows.each_slice(500) { |slice| VerseTranslation.upsert_all(slice, unique_by: [:translation_set_id, :verse_key]) }
+    en_rows.each_slice(500) do |slice|
+      VerseTranslation.upsert_all(
+        slice.map { |row| row.merge(id: SecureRandom.uuid) },
+        unique_by: [:translation_set_id, :verse_key]
+      )
+    end
+    ur_rows.each_slice(500) do |slice|
+      VerseTranslation.upsert_all(
+        slice.map { |row| row.merge(id: SecureRandom.uuid) },
+        unique_by: [:translation_set_id, :verse_key]
+      )
+    end
     print_status(english, urdu)
   end
 

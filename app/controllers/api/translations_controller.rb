@@ -2,6 +2,20 @@ module Api
   class TranslationsController < ApplicationController
     MAX_KEYS = 80
 
+    def status
+      english = TranslationSet.find_by(language: "en", translator: "natadarrab")
+      urdu = TranslationSet.find_by(language: "ur", translator: "natadarrab")
+      expected = 6236
+      en_count = english ? english.verse_translations.count : 0
+      ur_count = urdu ? urdu.verse_translations.count : 0
+      render json: {
+        expected: expected,
+        english: en_count,
+        urdu: ur_count,
+        complete: en_count >= expected && ur_count >= expected
+      }
+    end
+
     def index
       keys = parse_keys(params[:keys])
       if keys.empty?

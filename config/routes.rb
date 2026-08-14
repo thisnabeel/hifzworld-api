@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     get :health, to: "health#show"
     get :app_config, to: "app_config#show"
     get :translations, to: "translations#index"
+    get "translations/status", to: "translations#status"
 
     post "auth/apple", to: "auth#apple"
 

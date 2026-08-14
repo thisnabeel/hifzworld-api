@@ -152,6 +152,9 @@ namespace :translations do
 
     Rake::Task["translations:import_json"].invoke
   end
+
+  desc "Print translation coverage"
+  task status: :environment do
     english, urdu = ensure_sets!
     print_status(english, urdu)
   end

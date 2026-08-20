@@ -11,6 +11,8 @@ class User < ApplicationRecord
   has_many :subject_mushaf_marks, class_name: "MushafMark", foreign_key: :subject_id, dependent: :destroy
   has_many :marker_mushaf_marks, class_name: "MushafMark", foreign_key: :marker_id, dependent: :destroy
   has_many :journal_entries, dependent: :destroy
+  has_many :sent_messages, class_name: "Message", foreign_key: :sender_id, dependent: :destroy
+  has_many :received_messages, class_name: "Message", foreign_key: :recipient_id, dependent: :destroy
 
   validates :apple_sub, presence: true, uniqueness: true
   validates :display_name, presence: true

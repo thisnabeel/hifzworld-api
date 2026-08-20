@@ -70,5 +70,12 @@ Rails.application.routes.draw do
     end
 
     resources :journal_entries, only: %i[index create update]
+
+    get "messages/unread_count", to: "messages#unread_count"
+    resources :messages, only: %i[index create show] do
+      member do
+        post :read
+      end
+    end
   end
 end

@@ -9,3 +9,5 @@ LIVEKIT_API_SECRET:
 MIN_APP_VERSION:
 # Numeric App Store ID for the Update button deep link
 IOS_APP_STORE_ID:
+# Shared secret for saving hand-corrected scan page layouts (Taj scan editor)
+SCAN_EDITOR_TOKEN:

@@ -14,3 +14,14 @@
 #       methods: [:get, :post, :put, :patch, :delete, :options, :head]
 #   end
 # end
+
+# The Taj scan layout editor is a local HTML page (origin "null"); its endpoints carry no cookies,
+# reads are public and writes need the X-Editor-Token header.
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins "*"
+    resource "/api/scan_layouts/*",
+      headers: :any,
+      methods: %i[get put options]
+  end
+end

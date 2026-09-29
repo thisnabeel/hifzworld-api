@@ -71,6 +71,10 @@ Rails.application.routes.draw do
 
     resources :journal_entries, only: %i[index create update]
 
+    get "scan_layouts/:mushaf_key", to: "scan_layouts#index"
+    get "scan_layouts/:mushaf_key/:page", to: "scan_layouts#show"
+    put "scan_layouts/:mushaf_key/:page", to: "scan_layouts#update"
+
     get "messages/unread_count", to: "messages#unread_count"
     resources :messages, only: %i[index create show] do
       member do

@@ -1,5 +1,6 @@
 # Hand-corrected word tiles for a scanned mushaf page (e.g. the Taj 13-line scan).
-# Each tile maps a region of the page image (0…1 coordinates) to app word IDs.
+# Each tile maps a region of the page image (0…1 coordinates) to app word IDs, or to a surah number
+# for a surah header box.
 class ScanPageLayout < ApplicationRecord
   MUSHAF_KEYS = %w[taj13].freeze
   MAX_TILES = 400
@@ -27,8 +28,9 @@ class ScanPageLayout < ApplicationRecord
     end
 
     tiles.each_with_index do |tile, index|
-      unless tile.is_a?(Hash) && valid_ids?(tile["ids"]) && %w[x y width height].all? { |k| unit?(tile[k]) }
-        errors.add(:tiles, "tile #{index} needs ids and x/y/width/height between 0 and 1")
+      bound = tile.is_a?(Hash) && (valid_ids?(tile["ids"]) || surah_header?(tile))
+      unless bound && %w[x y width height].all? { |k| unit?(tile[k]) }
+        errors.add(:tiles, "tile #{index} needs word ids or a surah number, and x/y/width/height between 0 and 1")
         return
       end
     end
@@ -36,6 +38,11 @@ class ScanPageLayout < ApplicationRecord
 
   def valid_ids?(ids)
     ids.is_a?(Array) && ids.any? && ids.all? { |id| id.is_a?(Integer) && id.positive? }
+  end
+
+  # A surah header box (title + bismillah) is bound to its surah instead of words.
+  def surah_header?(tile)
+    tile["surah"].is_a?(Integer) && tile["surah"].between?(1, 114) && Array(tile["ids"]).empty?
   end
 
   def unit?(value)

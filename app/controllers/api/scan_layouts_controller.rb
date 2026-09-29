@@ -23,7 +23,8 @@ module Api
       render json: layout.as_json
     end
 
-    # PUT /api/scan_layouts/:mushaf_key/:page  { tiles: [{ ids: [..], x:, y:, width:, height: }, ...] }
+    # PUT /api/scan_layouts/:mushaf_key/:page
+    #   { tiles: [{ ids: [..], x:, y:, width:, height: }, { ids: [], surah: 103, ... }, ...] }
     def update
       layout = ScanPageLayout.find_or_initialize_by(mushaf_key: params[:mushaf_key], page: params[:page].to_i)
       layout.tiles = tiles_param
@@ -40,11 +41,13 @@ module Api
       raw = params.require(:tiles)
       raw = raw.map { |t| t.respond_to?(:to_unsafe_h) ? t.to_unsafe_h : t } if raw.is_a?(Array)
       Array(raw).map do |t|
-        {
+        tile = {
           "ids" => Array(t["ids"]).map { |id| Integer(id, exception: false) },
           "x" => t["x"].to_f, "y" => t["y"].to_f,
           "width" => t["width"].to_f, "height" => t["height"].to_f
         }
+        tile["surah"] = Integer(t["surah"], exception: false) if t["surah"].present?
+        tile
       end
     end
 

@@ -2,7 +2,7 @@ module Api
   # Word-tile layouts for scanned mushaf pages. Reads are public (coordinates and word IDs only,
   # never the page images); saving needs the editor token (SCAN_EDITOR_TOKEN).
   class ScanLayoutsController < ApplicationController
-    before_action :authenticate_editor!, only: :update
+    before_action :authenticate_editor!, only: %i[update update_status]
     before_action :validate_mushaf_key
 
     # GET /api/scan_layouts/:mushaf_key?pages=3,12,402
@@ -13,6 +13,22 @@ module Api
         scope = scope.where(page: pages)
       end
       render json: { layouts: scope.order(:page).map(&:as_json) }
+    end
+
+    # GET /api/scan_layouts/:mushaf_key/statuses
+    def statuses
+      render json: { statuses: ScanPageStatus.where(mushaf_key: params[:mushaf_key]).order(:page).map(&:as_json) }
+    end
+
+    # PUT /api/scan_layouts/:mushaf_key/:page/status  { ready: true|false }
+    def update_status
+      status = ScanPageStatus.find_or_initialize_by(mushaf_key: params[:mushaf_key], page: params[:page].to_i)
+      status.ready = ActiveModel::Type::Boolean.new.cast(params[:ready])
+      if status.save
+        render json: status.as_json
+      else
+        render_unprocessable(status)
+      end
     end
 
     # GET /api/scan_layouts/:mushaf_key/:page

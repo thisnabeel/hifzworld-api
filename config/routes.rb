@@ -72,6 +72,8 @@ Rails.application.routes.draw do
     resources :journal_entries, only: %i[index create update]
 
     get "scan_layouts/:mushaf_key", to: "scan_layouts#index"
+    get "scan_layouts/:mushaf_key/statuses", to: "scan_layouts#statuses"
+    put "scan_layouts/:mushaf_key/:page/status", to: "scan_layouts#update_status"
     get "scan_layouts/:mushaf_key/:page", to: "scan_layouts#show"
     put "scan_layouts/:mushaf_key/:page", to: "scan_layouts#update"
 

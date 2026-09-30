@@ -33,6 +33,14 @@ class ScanPageLayout < ApplicationRecord
         errors.add(:tiles, "tile #{index} needs word ids or a surah number, and x/y/width/height between 0 and 1")
         return
       end
+      if tile.key?("text") && !(tile["text"].is_a?(String) && tile["text"].length <= 200)
+        errors.add(:tiles, "tile #{index} text must be at most 200 characters")
+        return
+      end
+      if tile.key?("ayah") && !tile["ayah"].to_s.match?(/\A\d{1,3}:\d{1,3}\z/)
+        errors.add(:tiles, "tile #{index} verse must look like 2:19")
+        return
+      end
     end
   end
 

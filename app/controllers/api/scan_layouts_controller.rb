@@ -63,6 +63,9 @@ module Api
           "width" => t["width"].to_f, "height" => t["height"].to_f
         }
         tile["surah"] = Integer(t["surah"], exception: false) if t["surah"].present?
+        # optional label overrides typed in the editor
+        tile["text"] = t["text"].to_s if t["text"].present?
+        tile["ayah"] = t["ayah"].to_s.strip if t["ayah"].present?
         tile
       end
     end
